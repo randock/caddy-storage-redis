@@ -389,12 +389,6 @@ func (rs RedisStorage) List(ctx context.Context, dir string, recursive bool) ([]
 
 			// Iterate over returned keys
 			for _, key := range keys {
-				// Proceed only if key type is regular string value
-				keyType := rs.client.Type(ctx, key).Val()
-				if keyType != "string" {
-					continue
-				}
-
 				trimmedKey := rs.trimKey(key)
 				keyList = append(keyList, trimmedKey)
 			}
@@ -405,6 +399,8 @@ func (rs RedisStorage) List(ctx context.Context, dir string, recursive bool) ([]
 			}
 			pointer = nextPointer
 		}
+
+		rs.logger.Debug(fmt.Sprintf("Return keyList: %d", len(keyList)))
 
 		return keyList, nil
 	}
