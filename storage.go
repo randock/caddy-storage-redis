@@ -372,8 +372,8 @@ func (rs RedisStorage) List(ctx context.Context, dir string, recursive bool) ([]
 
 	rs.logger.Debug(fmt.Sprintf("List: %s, %b", dir, recursive))
 
-	// when iterating all keys ( recursive = true and dir = "/"), use scan, because zrange is slow
-	if recursive && dir == "/" {
+	// when iterating all keys ( recursive = true and dir = ""), use scan, because zrange is slow
+	if recursive && dir == "" {
 		var keyList []string
 		var currKey = rs.prefixKey(dir)
 
