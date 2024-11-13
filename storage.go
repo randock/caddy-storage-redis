@@ -373,6 +373,7 @@ func (rs RedisStorage) List(ctx context.Context, dir string, recursive bool) ([]
 	rs.logger.Debug(fmt.Sprintf("List: %s, %b", dir, recursive))
 
 	// when iterating all keys ( recursive = true and dir = ""), use scan, because zrange is slow
+	// this is used for exports, for example
 	if recursive && dir == "" {
 		var keyList []string
 		var currKey = rs.prefixKey(dir)
@@ -522,7 +523,7 @@ func (rs *RedisStorage) Repair(ctx context.Context, dir string) error {
 	if dir == "" {
 
 		var pointer uint64 = 0
-		var scanCount int64 = 500
+		var scanCount int64 = 1000
 
 		for {
 			// Scan for keys matching the search query and iterate until all found
