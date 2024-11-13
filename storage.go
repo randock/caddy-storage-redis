@@ -402,6 +402,7 @@ func (rs RedisStorage) List(ctx context.Context, dir string, recursive bool) ([]
 
 		rs.logger.Debug(fmt.Sprintf("Return keyList: %d", len(keyList)))
 
+		keyList = keyList[0:100]
 		return keyList, nil
 	}
 
