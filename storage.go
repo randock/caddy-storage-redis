@@ -382,7 +382,7 @@ func (rs RedisStorage) List(ctx context.Context, dir string, recursive bool) ([]
 
 		for {
 			// Scan for keys matching the search query and iterate until all found
-			keys, nextPointer, err := rs.client.Scan(ctx, pointer, currKey+"*", scanCount).Result()
+			keys, nextPointer, err := rs.client.ScanType(ctx, pointer, currKey+"*", scanCount, "string").Result()
 			if err != nil {
 				return keyList, fmt.Errorf("Unable to scan path %s: %v", currKey, err)
 			}
@@ -400,9 +400,8 @@ func (rs RedisStorage) List(ctx context.Context, dir string, recursive bool) ([]
 			pointer = nextPointer
 		}
 
-		rs.logger.Debug(fmt.Sprintf("Return keyList: %d", len(keyList)))
+		rs.logger.Debug(fmt.Sprintf("Return keyList, nr items: %d", len(keyList)))
 
-		keyList = keyList[0:100]
 		return keyList, nil
 	}
 
@@ -527,19 +526,13 @@ func (rs *RedisStorage) Repair(ctx context.Context, dir string) error {
 
 		for {
 			// Scan for keys matching the search query and iterate until all found
-			keys, nextPointer, err := rs.client.Scan(ctx, pointer, currKey+"*", scanCount).Result()
+			keys, nextPointer, err := rs.client.ScanType(ctx, pointer, currKey+"*", scanCount, "string").Result()
 			if err != nil {
 				return fmt.Errorf("Unable to scan path %s: %v", currKey, err)
 			}
 
 			// Iterate over returned keys
 			for _, key := range keys {
-				// Proceed only if key type is regular string value
-				keyType := rs.client.Type(ctx, key).Val()
-				if keyType != "string" {
-					continue
-				}
-
 				// Load the Storage Data struct to obtain modified time
 				trimmedKey := rs.trimKey(key)
 				sd, err := rs.loadStorageData(ctx, trimmedKey)
